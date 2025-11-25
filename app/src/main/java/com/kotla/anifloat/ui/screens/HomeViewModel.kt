@@ -8,7 +8,8 @@ import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.kotla.anifloat.data.AnilistRepository
 import com.kotla.anifloat.data.AuthRepository
-import com.kotla.anifloat.data.UserMediaListResult
+import com.kotla.anifloat.data.UpdateInfo
+import com.kotla.anifloat.data.UpdateRepository
 import com.kotla.anifloat.data.api.NetworkModule
 import com.kotla.anifloat.data.model.MediaListEntry
 import com.kotla.anifloat.data.model.Viewer
@@ -23,8 +24,17 @@ sealed class HomeUiState {
     data class Error(val message: String) : HomeUiState()
 }
 
+sealed class UpdateUiState {
+    object Idle : UpdateUiState()
+    object Checking : UpdateUiState()
+    data class Available(val updateInfo: UpdateInfo) : UpdateUiState()
+    data class Downloading(val progress: Int) : UpdateUiState()
+    data class Error(val message: String) : UpdateUiState()
+}
+
 class HomeViewModel(
-    private val repository: AnilistRepository
+    private val repository: AnilistRepository,
+    private val updateRepository: UpdateRepository
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow<HomeUiState>(HomeUiState.Loading)
@@ -33,8 +43,44 @@ class HomeViewModel(
     private val _isRefreshing = MutableStateFlow(false)
     val isRefreshing: StateFlow<Boolean> = _isRefreshing.asStateFlow()
 
+    private val _updateState = MutableStateFlow<UpdateUiState>(UpdateUiState.Idle)
+    val updateState: StateFlow<UpdateUiState> = _updateState.asStateFlow()
+
     init {
         fetchAnimeList()
+        checkForUpdates()
+    }
+
+    fun checkForUpdates() {
+        viewModelScope.launch {
+            _updateState.value = UpdateUiState.Checking
+            val updateInfo = updateRepository.checkForUpdate()
+            _updateState.value = when {
+                updateInfo == null -> UpdateUiState.Idle
+                updateInfo.isUpdateAvailable -> UpdateUiState.Available(updateInfo)
+                else -> UpdateUiState.Idle
+            }
+        }
+    }
+
+    fun downloadUpdate(downloadUrl: String) {
+        viewModelScope.launch {
+            _updateState.value = UpdateUiState.Downloading(0)
+            val success = updateRepository.downloadAndInstallApk(downloadUrl) { progress ->
+                _updateState.value = UpdateUiState.Downloading(progress)
+            }
+            if (!success) {
+                _updateState.value = UpdateUiState.Error("Download failed. Please try again or download manually.")
+            }
+        }
+    }
+
+    fun openReleasePage(url: String) {
+        updateRepository.openReleasePage(url)
+    }
+
+    fun dismissUpdate() {
+        _updateState.value = UpdateUiState.Idle
     }
 
     fun fetchAnimeList() {
@@ -76,7 +122,8 @@ class HomeViewModel(
             initializer {
                 val authRepo = AuthRepository(application)
                 val repo = AnilistRepository(NetworkModule.api, authRepo)
-                HomeViewModel(repo)
+                val updateRepo = UpdateRepository(NetworkModule.githubApi, application)
+                HomeViewModel(repo, updateRepo)
             }
         }
     }

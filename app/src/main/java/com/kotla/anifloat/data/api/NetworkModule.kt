@@ -8,7 +8,8 @@ import java.util.concurrent.TimeUnit
 
 object NetworkModule {
     
-    private const val BASE_URL = "https://graphql.anilist.co"
+    private const val ANILIST_BASE_URL = "https://graphql.anilist.co"
+    private const val GITHUB_BASE_URL = "https://api.github.com/"
 
     private val loggingInterceptor = HttpLoggingInterceptor().apply {
         level = HttpLoggingInterceptor.Level.BODY
@@ -21,10 +22,17 @@ object NetworkModule {
         .build()
 
     val api: AnilistApi = Retrofit.Builder()
-        .baseUrl(BASE_URL)
+        .baseUrl(ANILIST_BASE_URL)
         .client(okHttpClient)
         .addConverterFactory(GsonConverterFactory.create())
         .build()
         .create(AnilistApi::class.java)
+    
+    val githubApi: GitHubApi = Retrofit.Builder()
+        .baseUrl(GITHUB_BASE_URL)
+        .client(okHttpClient)
+        .addConverterFactory(GsonConverterFactory.create())
+        .build()
+        .create(GitHubApi::class.java)
 }
 
