@@ -121,6 +121,10 @@ fun HomeScreen(
                         onProfile = {
                             viewer?.id?.let { openAniListProfile(context, it) }
                         },
+                        onReset = {
+                            val intent = Intent(context, FloatingOverlayService::class.java)
+                            context.stopService(intent)
+                        },
                         onLogout = {
                             viewModel.logout(onLogout)
                         }
@@ -291,6 +295,7 @@ private fun ProfileMenu(
     avatarUrl: String?,
     viewerName: String?,
     onProfile: () -> Unit,
+    onReset: () -> Unit,
     onLogout: () -> Unit
 ) {
     var expanded by remember { mutableStateOf(false) }
@@ -331,6 +336,13 @@ private fun ProfileMenu(
             onClick = {
                 expanded = false
                 onProfile()
+            }
+        )
+        DropdownMenuItem(
+            text = { Text("Reset") },
+            onClick = {
+                expanded = false
+                onReset()
             }
         )
         DropdownMenuItem(
