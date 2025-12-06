@@ -1,6 +1,6 @@
 # AniFloat
 
-AniFloat is an Android overlay companion for AniList users. Log in with AniList, pick an anime, and you get a draggable floating control bubble that stays on top of streaming apps so you can increment or edit progress without leaving the video. Features include:
+AniFloat is an Android overlay companion for AniList users. Log in with AniList, pick an anime, and you get a draggable floating control bubble that stays on top of streaming apps so you can increment or edit progress without leaving the video. Features includes:
 
 - AniList login
 - “Watching” list and live progress bars
