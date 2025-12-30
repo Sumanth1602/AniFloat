@@ -2,6 +2,7 @@ package com.kotla.anifloat.ui.screens
 
 import android.app.Application
 import android.content.Intent
+import android.os.Build
 import android.provider.Settings
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -55,6 +56,11 @@ import com.kotla.anifloat.ui.theme.PrimaryGradientEnd
 import com.kotla.anifloat.ui.theme.PrimaryGradientStart
 import com.kotla.anifloat.ui.theme.TextPrimary
 import com.kotla.anifloat.ui.theme.TextSecondary
+import com.kyant.backdrop.Backdrop
+import com.kotla.anifloat.ui.components.LiquidGlassCard
+import com.kotla.anifloat.ui.components.LiquidGlassCircleButton
+import com.kotla.anifloat.ui.components.LiquidGlassSurface
+import com.kotla.anifloat.ui.components.rememberAmbientBackdrop
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -200,92 +206,153 @@ fun HomeScreen(
 
 @Composable
 fun AnimeList(animeList: List<MediaListEntry>, onItemClick: (MediaListEntry) -> Unit) {
+    // Create ambient backdrop for liquid glass effect in list items
+    val backdrop = rememberAmbientBackdrop(
+        baseColor = DarkBackground,
+        highlightColor = DarkSurface
+    )
+    
     LazyColumn(
         contentPadding = PaddingValues(16.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         items(animeList) { entry ->
-            AnimeItem(entry, onClick = { onItemClick(entry) })
+            AnimeItem(
+                entry = entry,
+                onClick = { onItemClick(entry) },
+                backdrop = backdrop
+            )
         }
     }
 }
 
 @Composable
-fun AnimeItem(entry: MediaListEntry, onClick: () -> Unit) {
+fun AnimeItem(
+    entry: MediaListEntry,
+    onClick: () -> Unit,
+    backdrop: Backdrop
+) {
     val progress = entry.progress
     val total = entry.media.episodes ?: 0
     val progressFraction = if (total > 0) progress.toFloat() / total.toFloat() else 0f
+    
+    val glassBorder = Brush.verticalGradient(
+        colors = listOf(
+            Color.White.copy(alpha = 0.15f),
+            Color.White.copy(alpha = 0.05f)
+        )
+    )
 
-    Row(
+    LiquidGlassCard(
         modifier = Modifier
             .fillMaxWidth()
             .height(110.dp)
-            .clip(RoundedCornerShape(18.dp))
-            .background(DarkSurface)
-            .border(1.dp, CardStroke, RoundedCornerShape(18.dp))
             .clickable(onClick = onClick),
-        verticalAlignment = Alignment.CenterVertically
+        backdrop = backdrop,
+        cornerRadius = 18.dp,
+        blurRadius = 24.dp,
+        surfaceColor = DarkSurface.copy(alpha = 0.6f),
+        borderGradient = glassBorder
     ) {
-        // Poster
-        AsyncImage(
-            model = entry.media.coverImage.medium,
-            contentDescription = null,
-            modifier = Modifier
-                .width(80.dp)
-                .fillMaxHeight(),
-            contentScale = ContentScale.Crop
-        )
-
-        // Info Column
-        Column(
-            modifier = Modifier
-                .weight(1f)
-                .fillMaxHeight()
-                .padding(12.dp),
-            verticalArrangement = Arrangement.SpaceBetween
+        Row(
+            modifier = Modifier.fillMaxSize(),
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            // Title & Ep Info
-            Column {
-                Text(
-                    text = entry.media.title.userPreferred,
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold,
-                    color = TextPrimary,
-                    maxLines = 2
+            // Poster with glass border
+            Box(
+                modifier = Modifier
+                    .width(80.dp)
+                    .fillMaxHeight()
+                    .clip(RoundedCornerShape(topStart = 18.dp, bottomStart = 18.dp))
+            ) {
+                AsyncImage(
+                    model = entry.media.coverImage.medium,
+                    contentDescription = null,
+                    modifier = Modifier.fillMaxSize(),
+                    contentScale = ContentScale.Crop
                 )
-                Spacer(modifier = Modifier.height(4.dp))
-                Text(
-                    text = "$progress / ${if (total > 0) total else "?"} Episodes",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = TextSecondary
+                // Subtle gradient overlay for glass effect
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(
+                            Brush.horizontalGradient(
+                                colors = listOf(
+                                    Color.Transparent,
+                                    DarkSurface.copy(alpha = 0.3f)
+                                ),
+                                startX = 60f
+                            )
+                        )
                 )
             }
 
-            // Progress Bar
-            LinearProgressIndicator(
-                progress = { progressFraction },
+            // Info Column
+            Column(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .height(4.dp)
-                    .clip(RoundedCornerShape(2.dp)),
-                color = PrimaryAccent,
-                trackColor = Color.DarkGray,
-            )
-        }
+                    .weight(1f)
+                    .fillMaxHeight()
+                    .padding(12.dp),
+                verticalArrangement = Arrangement.SpaceBetween
+            ) {
+                // Title & Ep Info
+                Column {
+                    Text(
+                        text = entry.media.title.userPreferred,
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold,
+                        color = TextPrimary,
+                        maxLines = 2
+                    )
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text(
+                        text = "$progress / ${if (total > 0) total else "?"} Episodes",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = TextSecondary
+                    )
+                }
 
-        IconButton(
-            onClick = onClick,
-            modifier = Modifier
-                .padding(end = 12.dp)
-                .size(40.dp)
-                .clip(CircleShape)
-                .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f))
-        ) {
-            Icon(
-                imageVector = Icons.Default.PlayArrow,
-                contentDescription = "Open overlay",
-                tint = TextPrimary
-            )
+                // Progress Bar with glass styling
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(4.dp)
+                        .clip(RoundedCornerShape(2.dp))
+                        .background(Color.White.copy(alpha = 0.1f))
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxHeight()
+                            .fillMaxWidth(progressFraction)
+                            .background(
+                                Brush.horizontalGradient(
+                                    colors = listOf(PrimaryAccent, PrimaryAccentVariant)
+                                )
+                            )
+                    )
+                }
+            }
+
+            // Play button with liquid glass effect
+            LiquidGlassCircleButton(
+                onClick = onClick,
+                backdrop = backdrop,
+                modifier = Modifier
+                    .padding(end = 12.dp)
+                    .size(40.dp),
+                size = 40.dp,
+                blurRadius = 16.dp,
+                tint = PrimaryAccent,
+                surfaceColor = Color.White.copy(alpha = 0.1f),
+                borderColor = PrimaryAccent.copy(alpha = 0.4f)
+            ) {
+                Icon(
+                    imageVector = Icons.Default.PlayArrow,
+                    contentDescription = "Open overlay",
+                    tint = TextPrimary,
+                    modifier = Modifier.size(22.dp)
+                )
+            }
         }
     }
 }
@@ -367,16 +434,29 @@ private fun UpdateAvailableDialog(
     onDownload: (String?) -> Unit,
     onOpenReleasePage: () -> Unit
 ) {
+    val backdrop = rememberAmbientBackdrop(
+        baseColor = DarkBackground,
+        highlightColor = DarkSurface
+    )
+    
     Dialog(
         onDismissRequest = onDismiss,
         properties = DialogProperties(dismissOnBackPress = true, dismissOnClickOutside = true)
     ) {
-        Card(
+        LiquidGlassCard(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(16.dp),
-            shape = RoundedCornerShape(20.dp),
-            colors = CardDefaults.cardColors(containerColor = DarkSurface)
+            backdrop = backdrop,
+            cornerRadius = 24.dp,
+            blurRadius = 32.dp,
+            surfaceColor = DarkSurface.copy(alpha = 0.7f),
+            borderGradient = Brush.verticalGradient(
+                colors = listOf(
+                    Color.White.copy(alpha = 0.2f),
+                    Color.White.copy(alpha = 0.05f)
+                )
+            )
         ) {
             Column(
                 modifier = Modifier
@@ -452,8 +532,9 @@ private fun UpdateAvailableDialog(
                         modifier = Modifier
                             .fillMaxWidth()
                             .heightIn(max = 150.dp)
-                            .clip(RoundedCornerShape(8.dp))
-                            .background(DarkBackground)
+                            .clip(RoundedCornerShape(12.dp))
+                            .background(Color.White.copy(alpha = 0.05f))
+                            .border(1.dp, Color.White.copy(alpha = 0.1f), RoundedCornerShape(12.dp))
                             .padding(12.dp)
                     ) {
                         Text(
@@ -467,18 +548,29 @@ private fun UpdateAvailableDialog(
                 
                 Spacer(modifier = Modifier.height(24.dp))
                 
-                // Buttons
-                Button(
-                    onClick = { onDownload(updateInfo.downloadUrl) },
-                    modifier = Modifier.fillMaxWidth(),
-                    colors = ButtonDefaults.buttonColors(containerColor = PrimaryAccent),
-                    shape = RoundedCornerShape(12.dp)
+                // Download button with liquid glass
+                LiquidGlassSurface(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(48.dp),
+                    backdrop = backdrop,
+                    shape = RoundedCornerShape(12.dp),
+                    blurRadius = 16.dp,
+                    tint = PrimaryAccent,
+                    surfaceColor = PrimaryAccent.copy(alpha = 0.3f),
+                    borderColor = PrimaryAccent.copy(alpha = 0.5f),
+                    onClick = { onDownload(updateInfo.downloadUrl) }
                 ) {
-                    Text(
-                        text = if (updateInfo.downloadUrl != null) "Download & Install" else "View Release",
-                        fontWeight = FontWeight.Bold,
-                        modifier = Modifier.padding(vertical = 4.dp)
-                    )
+                    Box(
+                        modifier = Modifier.fillMaxSize(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = if (updateInfo.downloadUrl != null) "Download & Install" else "View Release",
+                            fontWeight = FontWeight.Bold,
+                            color = Color.White
+                        )
+                    }
                 }
                 
                 Spacer(modifier = Modifier.height(8.dp))
@@ -511,16 +603,29 @@ private fun UpdateAvailableDialog(
 
 @Composable
 private fun DownloadingDialog(progress: Int) {
+    val backdrop = rememberAmbientBackdrop(
+        baseColor = DarkBackground,
+        highlightColor = DarkSurface
+    )
+    
     Dialog(
         onDismissRequest = { /* Cannot dismiss while downloading */ },
         properties = DialogProperties(dismissOnBackPress = false, dismissOnClickOutside = false)
     ) {
-        Card(
+        LiquidGlassCard(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(16.dp),
-            shape = RoundedCornerShape(20.dp),
-            colors = CardDefaults.cardColors(containerColor = DarkSurface)
+            backdrop = backdrop,
+            cornerRadius = 24.dp,
+            blurRadius = 32.dp,
+            surfaceColor = DarkSurface.copy(alpha = 0.7f),
+            borderGradient = Brush.verticalGradient(
+                colors = listOf(
+                    Color.White.copy(alpha = 0.2f),
+                    Color.White.copy(alpha = 0.05f)
+                )
+            )
         ) {
             Column(
                 modifier = Modifier
@@ -537,15 +642,26 @@ private fun DownloadingDialog(progress: Int) {
                 
                 Spacer(modifier = Modifier.height(24.dp))
                 
-                LinearProgressIndicator(
-                    progress = { progress / 100f },
+                // Glass-styled progress bar
+                Box(
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(8.dp)
-                        .clip(RoundedCornerShape(4.dp)),
-                    color = PrimaryAccent,
-                    trackColor = DarkBackground,
-                )
+                        .clip(RoundedCornerShape(4.dp))
+                        .background(Color.White.copy(alpha = 0.1f))
+                        .border(1.dp, Color.White.copy(alpha = 0.1f), RoundedCornerShape(4.dp))
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxHeight()
+                            .fillMaxWidth(progress / 100f)
+                            .background(
+                                Brush.horizontalGradient(
+                                    colors = listOf(PrimaryAccent, PrimaryAccentVariant)
+                                )
+                            )
+                    )
+                }
                 
                 Spacer(modifier = Modifier.height(12.dp))
                 
@@ -574,16 +690,29 @@ private fun UpdateErrorDialog(
     onDismiss: () -> Unit,
     onRetry: () -> Unit
 ) {
+    val backdrop = rememberAmbientBackdrop(
+        baseColor = DarkBackground,
+        highlightColor = DarkSurface
+    )
+    
     Dialog(
         onDismissRequest = onDismiss,
         properties = DialogProperties(dismissOnBackPress = true, dismissOnClickOutside = true)
     ) {
-        Card(
+        LiquidGlassCard(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(16.dp),
-            shape = RoundedCornerShape(20.dp),
-            colors = CardDefaults.cardColors(containerColor = DarkSurface)
+            backdrop = backdrop,
+            cornerRadius = 24.dp,
+            blurRadius = 32.dp,
+            surfaceColor = DarkSurface.copy(alpha = 0.7f),
+            borderGradient = Brush.verticalGradient(
+                colors = listOf(
+                    Color(0xFFEF5350).copy(alpha = 0.3f),
+                    Color.White.copy(alpha = 0.05f)
+                )
+            )
         ) {
             Column(
                 modifier = Modifier
@@ -613,21 +742,45 @@ private fun UpdateErrorDialog(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
-                    OutlinedButton(
-                        onClick = onDismiss,
-                        modifier = Modifier.weight(1f),
-                        shape = RoundedCornerShape(12.dp)
+                    // Cancel button with glass effect
+                    LiquidGlassSurface(
+                        modifier = Modifier
+                            .weight(1f)
+                            .height(44.dp),
+                        backdrop = backdrop,
+                        shape = RoundedCornerShape(12.dp),
+                        blurRadius = 12.dp,
+                        surfaceColor = Color.White.copy(alpha = 0.08f),
+                        borderColor = Color.White.copy(alpha = 0.2f),
+                        onClick = onDismiss
                     ) {
-                        Text("Cancel", color = TextSecondary)
+                        Box(
+                            modifier = Modifier.fillMaxSize(),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text("Cancel", color = TextSecondary)
+                        }
                     }
                     
-                    Button(
-                        onClick = onRetry,
-                        modifier = Modifier.weight(1f),
-                        colors = ButtonDefaults.buttonColors(containerColor = PrimaryAccent),
-                        shape = RoundedCornerShape(12.dp)
+                    // Retry button with glass effect
+                    LiquidGlassSurface(
+                        modifier = Modifier
+                            .weight(1f)
+                            .height(44.dp),
+                        backdrop = backdrop,
+                        shape = RoundedCornerShape(12.dp),
+                        blurRadius = 12.dp,
+                        tint = PrimaryAccent,
+                        surfaceColor = PrimaryAccent.copy(alpha = 0.3f),
+                        borderColor = PrimaryAccent.copy(alpha = 0.5f),
+                        onClick = onRetry
                     ) {
-                        Text("Retry")
+                        Box(
+                            modifier = Modifier.fillMaxSize(),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text("Retry", color = Color.White, fontWeight = FontWeight.Bold)
+                        }
                     }
                 }
             }
