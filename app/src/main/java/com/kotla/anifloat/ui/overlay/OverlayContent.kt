@@ -2,12 +2,9 @@ package com.kotla.anifloat.ui.overlay
 
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.MarqueeAnimationMode
-import androidx.compose.foundation.background
 import androidx.compose.foundation.basicMarquee
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
@@ -25,9 +22,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
-import com.kotla.anifloat.ui.components.ClearGlassCard
-import com.kotla.anifloat.ui.components.ClearGlassCircleButton
-import com.kotla.anifloat.ui.components.FrostedGlassSurface
+import com.kotla.anifloat.ui.components.LiquidGlassCard
+import com.kotla.anifloat.ui.components.LiquidGlassCircleButton
+import com.kotla.anifloat.ui.components.LiquidGlassSurface
+import com.kotla.anifloat.ui.components.rememberAnimatedGlassBackdrop
 
 @Composable
 fun OverlayContent(
@@ -45,8 +43,15 @@ fun OverlayContent(
     showAddSequelButton: Boolean = false,
     onAddSequel: () -> Unit = {}
 ) {
+    // Create animated backdrop for liquid glass effect
+    val backdrop = rememberAnimatedGlassBackdrop(
+        primaryColor = Color(0xFF0D1B2A),
+        secondaryColor = Color(0xFF1B263B),
+        accentColor = Color(0xFF415A77)
+    )
+    
     if (isCollapsed) {
-        CollapsedOverlay(onExpand = onExpand)
+        CollapsedOverlay(onExpand = onExpand, backdrop = backdrop)
     } else {
         ExpandedOverlay(
             title = title,
@@ -59,25 +64,34 @@ fun OverlayContent(
             onClose = onClose,
             isBlurSupported = isBlurSupported,
             showAddSequelButton = showAddSequelButton,
-            onAddSequel = onAddSequel
+            onAddSequel = onAddSequel,
+            backdrop = backdrop
         )
     }
 }
 
 @Composable
-fun CollapsedOverlay(onExpand: () -> Unit) {
-    ClearGlassCircleButton(
+fun CollapsedOverlay(
+    onExpand: () -> Unit,
+    backdrop: com.kyant.backdrop.Backdrop
+) {
+    LiquidGlassCircleButton(
         onClick = onExpand,
-        modifier = Modifier.size(44.dp),
-        size = 44.dp,
-        backgroundColor = Color.Black.copy(alpha = 0.25f),
+        backdrop = backdrop,
+        modifier = Modifier.size(48.dp),
+        size = 48.dp,
+        blurRadius = 40.dp,
+        vibrancyAlpha = 0.2f,
+        lensRefractionHeight = 6.dp,
+        lensRefractionAmount = 16.dp,
+        surfaceColor = Color.White.copy(alpha = 0.08f),
         borderColor = Color.White.copy(alpha = 0.5f)
     ) {
         Icon(
             Icons.Default.PlayArrow,
             contentDescription = "Expand",
             tint = Color.White,
-            modifier = Modifier.size(24.dp)
+            modifier = Modifier.size(26.dp)
         )
     }
 }
@@ -95,15 +109,22 @@ fun ExpandedOverlay(
     onClose: () -> Unit,
     isBlurSupported: Boolean,
     showAddSequelButton: Boolean,
-    onAddSequel: () -> Unit
+    onAddSequel: () -> Unit,
+    backdrop: com.kyant.backdrop.Backdrop
 ) {
-    // Clear glass card - very transparent to show blur behind
-    ClearGlassCard(
+    // Liquid glass card with blur, vibrancy, and lens effects
+    LiquidGlassCard(
+        backdrop = backdrop,
         modifier = Modifier
             .width(220.dp)
             .wrapContentHeight(),
-        cornerRadius = 20.dp,
-        backgroundColor = Color.Black.copy(alpha = if (isBlurSupported) 0.15f else 0.7f),
+        cornerRadius = 24.dp,
+        blurRadius = 56.dp,
+        vibrancyColor = Color(0xFF64B5F6),
+        vibrancyAlpha = 0.15f,
+        lensRefractionHeight = 10.dp,
+        lensRefractionAmount = 28.dp,
+        surfaceColor = Color.White.copy(alpha = 0.05f),
         borderGradient = Brush.verticalGradient(
             colors = listOf(
                 Color.White.copy(alpha = 0.6f),
@@ -121,19 +142,24 @@ fun ExpandedOverlay(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.Start
             ) {
-                // Minimize button
-                ClearGlassCircleButton(
+                // Minimize button with glass effect
+                LiquidGlassCircleButton(
                     onClick = onMinimize,
-                    modifier = Modifier.size(24.dp),
-                    size = 24.dp,
-                    backgroundColor = Color.White.copy(alpha = 0.1f),
-                    borderColor = Color.White.copy(alpha = 0.3f)
+                    backdrop = backdrop,
+                    modifier = Modifier.size(26.dp),
+                    size = 26.dp,
+                    blurRadius = 24.dp,
+                    vibrancyAlpha = 0.15f,
+                    lensRefractionHeight = 3.dp,
+                    lensRefractionAmount = 8.dp,
+                    surfaceColor = Color.White.copy(alpha = 0.08f),
+                    borderColor = Color.White.copy(alpha = 0.35f)
                 ) {
                     Icon(
                         imageVector = Icons.Default.KeyboardArrowDown,
                         contentDescription = "Minimize",
                         tint = Color.White.copy(alpha = 0.9f),
-                        modifier = Modifier.size(16.dp)
+                        modifier = Modifier.size(18.dp)
                     )
                 }
                 Spacer(modifier = Modifier.width(8.dp))
@@ -159,11 +185,16 @@ fun ExpandedOverlay(
                         modifier = Modifier
                             .width(60.dp)
                             .height(90.dp)
-                            .clip(RoundedCornerShape(10.dp))
+                            .clip(RoundedCornerShape(12.dp))
                             .border(
                                 1.dp,
-                                Color.White.copy(alpha = 0.3f),
-                                RoundedCornerShape(10.dp)
+                                Brush.verticalGradient(
+                                    colors = listOf(
+                                        Color.White.copy(alpha = 0.4f),
+                                        Color.White.copy(alpha = 0.15f)
+                                    )
+                                ),
+                                RoundedCornerShape(12.dp)
                             )
                     ) {
                         AsyncImage(
@@ -215,16 +246,21 @@ fun ExpandedOverlay(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         // Minus Button
-                        ClearGlassCircleButton(
+                        LiquidGlassCircleButton(
                             onClick = onDecrement,
-                            modifier = Modifier.size(32.dp),
-                            size = 32.dp,
-                            backgroundColor = Color.White.copy(alpha = 0.1f),
+                            backdrop = backdrop,
+                            modifier = Modifier.size(34.dp),
+                            size = 34.dp,
+                            blurRadius = 28.dp,
+                            vibrancyAlpha = 0.12f,
+                            lensRefractionHeight = 4.dp,
+                            lensRefractionAmount = 10.dp,
+                            surfaceColor = Color.White.copy(alpha = 0.08f),
                             borderColor = Color.White.copy(alpha = 0.35f)
                         ) {
                             Text(
                                 "-",
-                                fontSize = 18.sp,
+                                fontSize = 20.sp,
                                 fontWeight = FontWeight.Medium,
                                 color = Color.White
                             )
@@ -233,30 +269,41 @@ fun ExpandedOverlay(
                         Spacer(modifier = Modifier.width(10.dp))
 
                         // Plus Button
-                        ClearGlassCircleButton(
+                        LiquidGlassCircleButton(
                             onClick = onIncrement,
-                            modifier = Modifier.size(32.dp),
-                            size = 32.dp,
-                            backgroundColor = Color.White.copy(alpha = 0.15f),
+                            backdrop = backdrop,
+                            modifier = Modifier.size(34.dp),
+                            size = 34.dp,
+                            blurRadius = 28.dp,
+                            vibrancyColor = Color(0xFF4CAF50),
+                            vibrancyAlpha = 0.2f,
+                            lensRefractionHeight = 4.dp,
+                            lensRefractionAmount = 10.dp,
+                            surfaceColor = Color.White.copy(alpha = 0.12f),
                             borderColor = Color.White.copy(alpha = 0.5f)
                         ) {
                             Icon(
                                 Icons.Default.Add,
                                 contentDescription = "Increment",
                                 tint = Color.White,
-                                modifier = Modifier.size(16.dp)
+                                modifier = Modifier.size(18.dp)
                             )
                         }
 
                         if (showAddSequelButton) {
                             Spacer(modifier = Modifier.width(10.dp))
-                            // Sequel button
-                            FrostedGlassSurface(
-                                modifier = Modifier.height(26.dp),
-                                shape = RoundedCornerShape(13.dp),
-                                tintColor = Color(0xFF2AF598),
-                                tintAlpha = 0.25f,
-                                borderAlpha = 0.6f,
+                            // Sequel button with glass effect
+                            LiquidGlassSurface(
+                                backdrop = backdrop,
+                                modifier = Modifier.height(28.dp),
+                                shape = RoundedCornerShape(14.dp),
+                                blurRadius = 24.dp,
+                                vibrancyColor = Color(0xFF2AF598),
+                                vibrancyAlpha = 0.25f,
+                                lensRefractionHeight = 3.dp,
+                                lensRefractionAmount = 8.dp,
+                                surfaceColor = Color(0xFF2AF598).copy(alpha = 0.15f),
+                                borderColor = Color(0xFF2AF598).copy(alpha = 0.5f),
                                 onClick = onAddSequel
                             ) {
                                 Box(

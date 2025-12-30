@@ -4,7 +4,6 @@ import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
-import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.size
@@ -18,9 +17,15 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import com.kyant.backdrop.backdrops.rememberCanvasBackdrop
+import com.kyant.backdrop.drawBackdrop
+import com.kyant.backdrop.effects.blur
+import com.kyant.backdrop.effects.lens
+import com.kyant.backdrop.effects.vibrancy
 
 @Composable
 fun CloseTarget(isOver: Boolean) {
@@ -36,24 +41,76 @@ fun CloseTarget(isOver: Boolean) {
         label = "size"
     )
     
-    val backgroundColor by animateColorAsState(
-        targetValue = if (isOver) Color.Red.copy(alpha = 0.35f) else Color.Black.copy(alpha = 0.25f),
-        label = "backgroundColor"
+    val blurRadius by animateDpAsState(
+        targetValue = if (isOver) 56.dp else 40.dp,
+        animationSpec = spring(dampingRatio = 0.7f, stiffness = 300f),
+        label = "blur"
+    )
+    
+    val lensAmount by animateDpAsState(
+        targetValue = if (isOver) 24.dp else 16.dp,
+        animationSpec = spring(dampingRatio = 0.7f, stiffness = 300f),
+        label = "lens"
+    )
+    
+    val vibrancyColor by animateColorAsState(
+        targetValue = if (isOver) Color.Red else Color(0xFF64B5F6),
+        label = "vibrancy"
+    )
+    
+    val surfaceColor by animateColorAsState(
+        targetValue = if (isOver) Color.Red.copy(alpha = 0.2f) else Color.White.copy(alpha = 0.06f),
+        label = "surface"
     )
     
     val borderColor by animateColorAsState(
-        targetValue = if (isOver) Color.Red.copy(alpha = 0.8f) else Color.White.copy(alpha = 0.4f),
-        label = "borderColor"
+        targetValue = if (isOver) Color.Red.copy(alpha = 0.7f) else Color.White.copy(alpha = 0.4f),
+        label = "border"
     )
     
-    val iconColor = Color.White
+    // Create backdrop with animated colors
+    val backdrop = rememberCanvasBackdrop {
+        val primaryColor = if (isOver) Color(0xFF2D0A0A) else Color(0xFF0D1B2A)
+        val secondaryColor = if (isOver) Color(0xFF4A1515) else Color(0xFF1B263B)
+        val accentColor = if (isOver) Color(0xFF8B2020) else Color(0xFF415A77)
+        
+        drawRect(
+            brush = Brush.radialGradient(
+                colors = listOf(accentColor, secondaryColor, primaryColor),
+                center = Offset(this.size.width * 0.4f, this.size.height * 0.4f),
+                radius = this.size.maxDimension * 1.2f
+            )
+        )
+        
+        // Add highlight
+        drawCircle(
+            brush = Brush.radialGradient(
+                colors = listOf(
+                    Color.White.copy(alpha = 0.1f),
+                    Color.Transparent
+                ),
+                center = Offset(this.size.width * 0.3f, this.size.height * 0.3f),
+                radius = this.size.minDimension * 0.4f
+            ),
+            center = Offset(this.size.width * 0.3f, this.size.height * 0.3f),
+            radius = this.size.minDimension * 0.4f
+        )
+    }
 
     Box(
         modifier = Modifier
             .size(size)
             .scale(scale)
             .clip(CircleShape)
-            .background(backgroundColor)
+            .drawBackdrop(backdrop) {
+                blur(blurRadius)
+                vibrancy(vibrancyColor.copy(alpha = if (isOver) 0.3f else 0.15f))
+                lens(
+                    refractionHeight = if (isOver) 8.dp else 5.dp,
+                    refractionAmount = lensAmount
+                )
+                fill(surfaceColor)
+            }
             .border(
                 width = if (isOver) 2.dp else 1.dp,
                 brush = Brush.verticalGradient(
@@ -69,7 +126,7 @@ fun CloseTarget(isOver: Boolean) {
         Icon(
             imageVector = Icons.Default.Close,
             contentDescription = "Close Service",
-            tint = iconColor,
+            tint = Color.White,
             modifier = Modifier.size(if (isOver) 32.dp else 28.dp)
         )
     }

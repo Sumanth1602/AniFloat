@@ -80,6 +80,9 @@ dependencies {
     
     // Service
     implementation(libs.androidx.lifecycle.service)
+    
+    // Liquid Glass Effects
+    implementation(libs.backdrop)
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
