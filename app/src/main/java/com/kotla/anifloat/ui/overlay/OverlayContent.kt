@@ -218,7 +218,7 @@ fun ExpandedOverlay(
                             .fillMaxWidth()
                             .basicMarquee(
                                 animationMode = MarqueeAnimationMode.Immediately,
-                                delayMillis = 1000
+                                initialDelayMillis = 1000
                             )
                     )
                     
