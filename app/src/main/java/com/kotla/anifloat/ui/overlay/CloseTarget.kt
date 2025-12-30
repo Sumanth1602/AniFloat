@@ -98,7 +98,7 @@ fun CloseTarget(isOver: Boolean) {
             .size(size)
             .scale(scale)
             .clip(CircleShape)
-            .drawBackdrop(backdrop, CircleShape) {
+            .drawBackdrop(backdrop, { CircleShape }) {
                 blur(blurRadius)
                 vibrancy()
                 lens(

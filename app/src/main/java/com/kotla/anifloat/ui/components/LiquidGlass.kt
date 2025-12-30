@@ -145,7 +145,7 @@ fun LiquidGlassSurface(
     Box(
         modifier = modifier
             .clip(shape)
-            .drawBackdrop(backdrop, shape) {
+            .drawBackdrop(backdrop, { shape }) {
                 // Apply blur effect
                 blur(blurRadius)
                 // Apply vibrancy (color overlay)
@@ -200,7 +200,7 @@ fun LiquidGlassCircleButton(
     Box(
         modifier = modifier
             .clip(CircleShape)
-            .drawBackdrop(backdrop, CircleShape) {
+            .drawBackdrop(backdrop, { CircleShape }) {
                 blur(blurRadius)
                 vibrancy()
                 lens(
@@ -243,7 +243,7 @@ fun LiquidGlassCard(
     Box(
         modifier = modifier
             .clip(shape)
-            .drawBackdrop(backdrop, shape) {
+            .drawBackdrop(backdrop, { shape }) {
                 blur(blurRadius)
                 vibrancy()
                 lens(
