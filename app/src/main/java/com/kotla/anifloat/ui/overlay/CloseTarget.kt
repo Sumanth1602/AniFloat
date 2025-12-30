@@ -4,6 +4,7 @@ import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
+import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.size
@@ -41,21 +42,16 @@ fun CloseTarget(isOver: Boolean) {
         label = "size"
     )
     
-    val blurRadius by animateDpAsState(
-        targetValue = if (isOver) 56.dp else 40.dp,
+    val blurRadius by animateFloatAsState(
+        targetValue = if (isOver) 56f else 40f,
         animationSpec = spring(dampingRatio = 0.7f, stiffness = 300f),
         label = "blur"
     )
     
-    val lensAmount by animateDpAsState(
-        targetValue = if (isOver) 24.dp else 16.dp,
+    val lensAmount by animateFloatAsState(
+        targetValue = if (isOver) 24f else 16f,
         animationSpec = spring(dampingRatio = 0.7f, stiffness = 300f),
         label = "lens"
-    )
-    
-    val vibrancyColor by animateColorAsState(
-        targetValue = if (isOver) Color.Red else Color(0xFF64B5F6),
-        label = "vibrancy"
     )
     
     val surfaceColor by animateColorAsState(
@@ -102,15 +98,17 @@ fun CloseTarget(isOver: Boolean) {
             .size(size)
             .scale(scale)
             .clip(CircleShape)
-            .drawBackdrop(backdrop) {
+            .drawBackdrop(backdrop, CircleShape) {
                 blur(blurRadius)
-                vibrancy(vibrancyColor.copy(alpha = if (isOver) 0.3f else 0.15f))
+                vibrancy()
                 lens(
-                    refractionHeight = if (isOver) 8.dp else 5.dp,
-                    refractionAmount = lensAmount
+                    refractionHeight = if (isOver) 8f else 5f,
+                    refractionAmount = lensAmount,
+                    depthEffect = true,
+                    chromaticAberration = true
                 )
-                fill(surfaceColor)
             }
+            .background(surfaceColor)
             .border(
                 width = if (isOver) 2.dp else 1.dp,
                 brush = Brush.verticalGradient(

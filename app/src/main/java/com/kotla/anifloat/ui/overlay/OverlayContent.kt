@@ -80,10 +80,9 @@ fun CollapsedOverlay(
         backdrop = backdrop,
         modifier = Modifier.size(48.dp),
         size = 48.dp,
-        blurRadius = 40.dp,
-        vibrancyAlpha = 0.2f,
-        lensRefractionHeight = 6.dp,
-        lensRefractionAmount = 16.dp,
+        blurRadius = 40f,
+        lensRefractionHeight = 6f,
+        lensRefractionAmount = 16f,
         surfaceColor = Color.White.copy(alpha = 0.08f),
         borderColor = Color.White.copy(alpha = 0.5f)
     ) {
@@ -119,11 +118,9 @@ fun ExpandedOverlay(
             .width(220.dp)
             .wrapContentHeight(),
         cornerRadius = 24.dp,
-        blurRadius = 56.dp,
-        vibrancyColor = Color(0xFF64B5F6),
-        vibrancyAlpha = 0.15f,
-        lensRefractionHeight = 10.dp,
-        lensRefractionAmount = 28.dp,
+        blurRadius = 56f,
+        lensRefractionHeight = 10f,
+        lensRefractionAmount = 28f,
         surfaceColor = Color.White.copy(alpha = 0.05f),
         borderGradient = Brush.verticalGradient(
             colors = listOf(
@@ -148,10 +145,9 @@ fun ExpandedOverlay(
                     backdrop = backdrop,
                     modifier = Modifier.size(26.dp),
                     size = 26.dp,
-                    blurRadius = 24.dp,
-                    vibrancyAlpha = 0.15f,
-                    lensRefractionHeight = 3.dp,
-                    lensRefractionAmount = 8.dp,
+                    blurRadius = 24f,
+                    lensRefractionHeight = 3f,
+                    lensRefractionAmount = 8f,
                     surfaceColor = Color.White.copy(alpha = 0.08f),
                     borderColor = Color.White.copy(alpha = 0.35f)
                 ) {
@@ -251,10 +247,9 @@ fun ExpandedOverlay(
                             backdrop = backdrop,
                             modifier = Modifier.size(34.dp),
                             size = 34.dp,
-                            blurRadius = 28.dp,
-                            vibrancyAlpha = 0.12f,
-                            lensRefractionHeight = 4.dp,
-                            lensRefractionAmount = 10.dp,
+                            blurRadius = 28f,
+                            lensRefractionHeight = 4f,
+                            lensRefractionAmount = 10f,
                             surfaceColor = Color.White.copy(alpha = 0.08f),
                             borderColor = Color.White.copy(alpha = 0.35f)
                         ) {
@@ -274,11 +269,9 @@ fun ExpandedOverlay(
                             backdrop = backdrop,
                             modifier = Modifier.size(34.dp),
                             size = 34.dp,
-                            blurRadius = 28.dp,
-                            vibrancyColor = Color(0xFF4CAF50),
-                            vibrancyAlpha = 0.2f,
-                            lensRefractionHeight = 4.dp,
-                            lensRefractionAmount = 10.dp,
+                            blurRadius = 28f,
+                            lensRefractionHeight = 4f,
+                            lensRefractionAmount = 10f,
                             surfaceColor = Color.White.copy(alpha = 0.12f),
                             borderColor = Color.White.copy(alpha = 0.5f)
                         ) {
@@ -297,11 +290,9 @@ fun ExpandedOverlay(
                                 backdrop = backdrop,
                                 modifier = Modifier.height(28.dp),
                                 shape = RoundedCornerShape(14.dp),
-                                blurRadius = 24.dp,
-                                vibrancyColor = Color(0xFF2AF598),
-                                vibrancyAlpha = 0.25f,
-                                lensRefractionHeight = 3.dp,
-                                lensRefractionAmount = 8.dp,
+                                blurRadius = 24f,
+                                lensRefractionHeight = 3f,
+                                lensRefractionAmount = 8f,
                                 surfaceColor = Color(0xFF2AF598).copy(alpha = 0.15f),
                                 borderColor = Color(0xFF2AF598).copy(alpha = 0.5f),
                                 onClick = onAddSequel

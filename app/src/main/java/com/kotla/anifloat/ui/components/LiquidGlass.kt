@@ -6,6 +6,7 @@ import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -132,11 +133,9 @@ fun LiquidGlassSurface(
     backdrop: Backdrop,
     modifier: Modifier = Modifier,
     shape: Shape = RoundedCornerShape(20.dp),
-    blurRadius: Dp = 40.dp,
-    vibrancyColor: Color = Color.White,
-    vibrancyAlpha: Float = 0.12f,
-    lensRefractionHeight: Dp = 8.dp,
-    lensRefractionAmount: Dp = 24.dp,
+    blurRadius: Float = 40f,
+    lensRefractionHeight: Float = 8f,
+    lensRefractionAmount: Float = 24f,
     surfaceColor: Color = Color.White.copy(alpha = 0.08f),
     borderColor: Color = Color.White.copy(alpha = 0.3f),
     borderWidth: Dp = 1.dp,
@@ -146,19 +145,20 @@ fun LiquidGlassSurface(
     Box(
         modifier = modifier
             .clip(shape)
-            .drawBackdrop(backdrop) {
+            .drawBackdrop(backdrop, shape) {
                 // Apply blur effect
                 blur(blurRadius)
                 // Apply vibrancy (color overlay)
-                vibrancy(vibrancyColor.copy(alpha = vibrancyAlpha))
+                vibrancy()
                 // Apply lens refraction at edges
                 lens(
                     refractionHeight = lensRefractionHeight,
-                    refractionAmount = lensRefractionAmount
+                    refractionAmount = lensRefractionAmount,
+                    depthEffect = true,
+                    chromaticAberration = true
                 )
-                // Surface tint
-                fill(surfaceColor)
             }
+            .background(surfaceColor)
             .border(borderWidth, borderColor, shape)
             .then(
                 if (onClick != null) Modifier.clickable(onClick = onClick)
@@ -177,11 +177,9 @@ fun LiquidGlassCircleButton(
     backdrop: Backdrop,
     modifier: Modifier = Modifier,
     size: Dp = 48.dp,
-    blurRadius: Dp = 32.dp,
-    vibrancyColor: Color = Color.White,
-    vibrancyAlpha: Float = 0.15f,
-    lensRefractionHeight: Dp = 4.dp,
-    lensRefractionAmount: Dp = 12.dp,
+    blurRadius: Float = 32f,
+    lensRefractionHeight: Float = 4f,
+    lensRefractionAmount: Float = 12f,
     surfaceColor: Color = Color.White.copy(alpha = 0.1f),
     borderColor: Color = Color.White.copy(alpha = 0.4f),
     isHighlighted: Boolean = false,
@@ -199,24 +197,20 @@ fun LiquidGlassCircleButton(
         borderColor
     }
     
-    val actualVibrancyColor = if (isHighlighted) {
-        Color.Red
-    } else {
-        vibrancyColor
-    }
-    
     Box(
         modifier = modifier
             .clip(CircleShape)
-            .drawBackdrop(backdrop) {
+            .drawBackdrop(backdrop, CircleShape) {
                 blur(blurRadius)
-                vibrancy(actualVibrancyColor.copy(alpha = vibrancyAlpha))
+                vibrancy()
                 lens(
                     refractionHeight = lensRefractionHeight,
-                    refractionAmount = lensRefractionAmount
+                    refractionAmount = lensRefractionAmount,
+                    depthEffect = true,
+                    chromaticAberration = true
                 )
-                fill(actualSurfaceColor)
             }
+            .background(actualSurfaceColor)
             .border(1.dp, actualBorderColor, CircleShape)
             .clickable(onClick = onClick),
         contentAlignment = Alignment.Center,
@@ -232,11 +226,9 @@ fun LiquidGlassCard(
     backdrop: Backdrop,
     modifier: Modifier = Modifier,
     cornerRadius: Dp = 20.dp,
-    blurRadius: Dp = 48.dp,
-    vibrancyColor: Color = Color.White,
-    vibrancyAlpha: Float = 0.1f,
-    lensRefractionHeight: Dp = 6.dp,
-    lensRefractionAmount: Dp = 20.dp,
+    blurRadius: Float = 48f,
+    lensRefractionHeight: Float = 6f,
+    lensRefractionAmount: Float = 20f,
     surfaceColor: Color = Color.White.copy(alpha = 0.06f),
     borderGradient: Brush = Brush.verticalGradient(
         colors = listOf(
@@ -251,15 +243,17 @@ fun LiquidGlassCard(
     Box(
         modifier = modifier
             .clip(shape)
-            .drawBackdrop(backdrop) {
+            .drawBackdrop(backdrop, shape) {
                 blur(blurRadius)
-                vibrancy(vibrancyColor.copy(alpha = vibrancyAlpha))
+                vibrancy()
                 lens(
                     refractionHeight = lensRefractionHeight,
-                    refractionAmount = lensRefractionAmount
+                    refractionAmount = lensRefractionAmount,
+                    depthEffect = true,
+                    chromaticAberration = true
                 )
-                fill(surfaceColor)
             }
+            .background(surfaceColor)
             .border(1.dp, borderGradient, shape),
         content = content
     )
