@@ -26,7 +26,11 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.net.toUri
+import com.kotla.anifloat.ui.components.LiquidGlassSurface
+import com.kotla.anifloat.ui.components.rememberAmbientBackdrop
 import com.kotla.anifloat.ui.theme.DarkBackground
+import com.kotla.anifloat.ui.theme.DarkSurface
+import com.kotla.anifloat.ui.theme.PrimaryAccent
 import com.kotla.anifloat.ui.theme.PrimaryGradientEnd
 import com.kotla.anifloat.ui.theme.PrimaryGradientStart
 import com.kotla.anifloat.ui.theme.TextPrimary
@@ -36,6 +40,10 @@ import com.kotla.anifloat.util.Constants
 @Composable
 fun LoginScreen() {
     val context = LocalContext.current
+    val backdrop = rememberAmbientBackdrop(
+        baseColor = DarkBackground,
+        highlightColor = DarkSurface
+    )
     
     Box(
         modifier = Modifier
@@ -43,13 +51,26 @@ fun LoginScreen() {
             .background(DarkBackground),
         contentAlignment = Alignment.Center
     ) {
-        // Optional background gradient blob or texture could go here
+        // Subtle ambient glow in background
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(
+                    Brush.radialGradient(
+                        colors = listOf(
+                            PrimaryAccent.copy(alpha = 0.08f),
+                            Color.Transparent
+                        ),
+                        radius = 800f
+                    )
+                )
+        )
         
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
-            // App Logo / Title
+            // App Logo / Title with subtle glow
             Text(
                 text = "AniFloat",
                 style = MaterialTheme.typography.displayMedium,
@@ -65,30 +86,27 @@ fun LoginScreen() {
             
             Spacer(modifier = Modifier.height(48.dp))
             
-            // Styled Login Button
-            Button(
+            // Liquid Glass Login Button
+            LiquidGlassSurface(
+                modifier = Modifier
+                    .height(54.dp)
+                    .fillMaxWidth(0.75f),
+                backdrop = backdrop,
+                shape = RoundedCornerShape(27.dp),
+                blurRadius = 24.dp,
+                lensRefractionHeight = 10.dp,
+                lensRefractionAmount = 18.dp,
+                tint = PrimaryAccent,
+                surfaceColor = PrimaryAccent.copy(alpha = 0.25f),
+                borderColor = PrimaryAccent.copy(alpha = 0.5f),
+                borderWidth = 1.5.dp,
                 onClick = {
                     val intent = Intent(Intent.ACTION_VIEW, Constants.ANILIST_AUTH_URL.toUri())
                     context.startActivity(intent)
-                },
-                modifier = Modifier
-                    .height(50.dp)
-                    .fillMaxWidth(0.7f),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = Color.Transparent
-                ),
-                contentPadding = PaddingValues() // Remove default padding to fit gradient
+                }
             ) {
                 Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .background(
-                            brush = Brush.horizontalGradient(
-                                colors = listOf(PrimaryGradientStart, PrimaryGradientEnd)
-                            ),
-                            shape = RoundedCornerShape(50)
-                        )
-                        .clip(RoundedCornerShape(50)),
+                    modifier = Modifier.fillMaxSize(),
                     contentAlignment = Alignment.Center
                 ) {
                     Text(

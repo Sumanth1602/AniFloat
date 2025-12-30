@@ -1,5 +1,6 @@
 package com.kotla.anifloat.ui.overlay
 
+import android.os.Build
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.MarqueeAnimationMode
 import androidx.compose.foundation.background
@@ -26,7 +27,14 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
-import androidx.compose.ui.draw.shadow
+import com.kyant.backdrop.Backdrop
+import com.kyant.backdrop.drawBackdrop
+import com.kyant.backdrop.effects.blur
+import com.kyant.backdrop.effects.lens
+import com.kyant.backdrop.effects.vibrancy
+import com.kotla.anifloat.ui.components.LiquidGlassCard
+import com.kotla.anifloat.ui.components.LiquidGlassCircleButton
+import com.kotla.anifloat.ui.components.rememberAmbientBackdrop
 
 @Composable
 fun OverlayContent(
@@ -44,8 +52,14 @@ fun OverlayContent(
     showAddSequelButton: Boolean = false,
     onAddSequel: () -> Unit = {}
 ) {
+    // Create ambient backdrop for liquid glass effect
+    val backdrop = rememberAmbientBackdrop()
+    
     if (isCollapsed) {
-        CollapsedOverlay(onExpand = onExpand)
+        CollapsedOverlay(
+            onExpand = onExpand,
+            backdrop = backdrop
+        )
     } else {
         ExpandedOverlay(
             title = title,
@@ -58,21 +72,26 @@ fun OverlayContent(
             onClose = onClose,
             isBlurSupported = isBlurSupported,
             showAddSequelButton = showAddSequelButton,
-            onAddSequel = onAddSequel
+            onAddSequel = onAddSequel,
+            backdrop = backdrop
         )
     }
 }
 
 @Composable
-fun CollapsedOverlay(onExpand: () -> Unit) {
-    Box(
-        modifier = Modifier
-            .size(40.dp)
-            .clip(CircleShape)
-            .background(Color(0xFF1F1F1F).copy(alpha = 0.8f))
-            .border(1.dp, Color.White.copy(alpha = 0.2f), CircleShape)
-            .clickable { onExpand() },
-        contentAlignment = Alignment.Center
+fun CollapsedOverlay(
+    onExpand: () -> Unit,
+    backdrop: Backdrop
+) {
+    LiquidGlassCircleButton(
+        onClick = onExpand,
+        backdrop = backdrop,
+        modifier = Modifier.size(44.dp),
+        size = 44.dp,
+        blurRadius = 20.dp,
+        tint = Color(0xFF6366F1),
+        surfaceColor = Color.White.copy(alpha = 0.12f),
+        borderColor = Color.White.copy(alpha = 0.3f)
     ) {
         Icon(
             Icons.Default.PlayArrow,
@@ -96,27 +115,25 @@ fun ExpandedOverlay(
     onClose: () -> Unit,
     isBlurSupported: Boolean,
     showAddSequelButton: Boolean,
-    onAddSequel: () -> Unit
+    onAddSequel: () -> Unit,
+    backdrop: Backdrop
 ) {
-    val containerAlpha = if (isBlurSupported) 0.5f else 0.9f
-    
     val glassBorder = Brush.verticalGradient(
         colors = listOf(
-            Color.White.copy(alpha = 0.3f),
-            Color.White.copy(alpha = 0.05f)
+            Color.White.copy(alpha = 0.4f),
+            Color.White.copy(alpha = 0.1f)
         )
     )
 
-    Card(
+    LiquidGlassCard(
         modifier = Modifier
-            .width(220.dp) // Slightly wider to fit poster + controls
-            .wrapContentHeight()
-            .border(1.dp, glassBorder, RoundedCornerShape(16.dp)),
-        shape = RoundedCornerShape(16.dp),
-        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = Color(0xFF000000).copy(alpha = containerAlpha)
-        )
+            .width(220.dp)
+            .wrapContentHeight(),
+        backdrop = backdrop,
+        cornerRadius = 20.dp,
+        blurRadius = 28.dp,
+        surfaceColor = Color.White.copy(alpha = 0.08f),
+        borderGradient = glassBorder
     ) {
         Column(
             modifier = Modifier.padding(12.dp),
@@ -128,41 +145,60 @@ fun ExpandedOverlay(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.Start
             ) {
-                Icon(
-                    imageVector = Icons.Default.KeyboardArrowDown,
-                    contentDescription = "Minimize",
-                    tint = Color.White.copy(alpha = 0.7f),
-                    modifier = Modifier
-                        .size(20.dp)
-                        .clickable { onMinimize() }
-                )
-                Spacer(modifier = Modifier.width(4.dp))
+                // Liquid glass minimize button
+                LiquidGlassCircleButton(
+                    onClick = onMinimize,
+                    backdrop = backdrop,
+                    modifier = Modifier.size(24.dp),
+                    size = 24.dp,
+                    blurRadius = 12.dp,
+                    surfaceColor = Color.White.copy(alpha = 0.15f),
+                    borderColor = Color.White.copy(alpha = 0.2f)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.KeyboardArrowDown,
+                        contentDescription = "Minimize",
+                        tint = Color.White.copy(alpha = 0.9f),
+                        modifier = Modifier.size(16.dp)
+                    )
+                }
+                Spacer(modifier = Modifier.width(8.dp))
                 Text(
                     text = "Tracker",
                     style = MaterialTheme.typography.labelSmall,
-                    color = Color.White.copy(alpha = 0.7f)
+                    color = Color.White.copy(alpha = 0.8f),
+                    fontWeight = FontWeight.Medium
                 )
                 Spacer(modifier = Modifier.weight(1f))
             }
 
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(10.dp))
             
             // Content Row: Poster + (Title/Progress/Controls)
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.Top
             ) {
-                // Poster
+                // Poster with subtle glass border
                 if (coverImage.isNotEmpty()) {
-                    AsyncImage(
-                        model = coverImage,
-                        contentDescription = null,
-                        contentScale = ContentScale.Crop,
+                    Box(
                         modifier = Modifier
                             .width(60.dp)
                             .height(90.dp)
-                            .clip(RoundedCornerShape(8.dp))
-                    )
+                            .clip(RoundedCornerShape(10.dp))
+                            .border(
+                                1.dp,
+                                Color.White.copy(alpha = 0.2f),
+                                RoundedCornerShape(10.dp)
+                            )
+                    ) {
+                        AsyncImage(
+                            model = coverImage,
+                            contentDescription = null,
+                            contentScale = ContentScale.Crop,
+                            modifier = Modifier.fillMaxSize()
+                        )
+                    }
                     Spacer(modifier = Modifier.width(12.dp))
                 }
                 
@@ -192,45 +228,48 @@ fun ExpandedOverlay(
                     Text(
                         text = "$progress / ${if (total > 0) total else "?"} Episodes",
                         style = MaterialTheme.typography.labelSmall,
-                        color = Color.White.copy(alpha = 0.8f),
+                        color = Color.White.copy(alpha = 0.85f),
                         fontWeight = FontWeight.SemiBold
                     )
                     
                     Spacer(modifier = Modifier.height(12.dp))
                     
-                    // Compact Controls (Beside Poster effectively)
+                    // Compact Controls with liquid glass buttons
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.Start,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        // Minus Button
-                        Box(
-                            modifier = Modifier
-                                .size(30.dp)
-                                .clip(CircleShape)
-                                .background(Color.White.copy(alpha = 0.15f))
-                                .clickable { onDecrement() },
-                            contentAlignment = Alignment.Center
+                        // Minus Button - Liquid Glass
+                        LiquidGlassCircleButton(
+                            onClick = onDecrement,
+                            backdrop = backdrop,
+                            modifier = Modifier.size(32.dp),
+                            size = 32.dp,
+                            blurRadius = 12.dp,
+                            surfaceColor = Color.White.copy(alpha = 0.12f),
+                            borderColor = Color.White.copy(alpha = 0.25f)
                         ) {
                             Text(
                                 "-",
-                                fontSize = 20.sp,
-                                fontWeight = FontWeight.Light,
+                                fontSize = 18.sp,
+                                fontWeight = FontWeight.Medium,
                                 color = Color.White
                             )
                         }
                         
-                        Spacer(modifier = Modifier.width(12.dp))
+                        Spacer(modifier = Modifier.width(10.dp))
 
-                        // Plus Button
-                        Box(
-                            modifier = Modifier
-                                .size(30.dp)
-                                .clip(CircleShape)
-                                .background(Color.White.copy(alpha = 0.15f))
-                                .clickable { onIncrement() },
-                            contentAlignment = Alignment.Center
+                        // Plus Button - Liquid Glass
+                        LiquidGlassCircleButton(
+                            onClick = onIncrement,
+                            backdrop = backdrop,
+                            modifier = Modifier.size(32.dp),
+                            size = 32.dp,
+                            blurRadius = 12.dp,
+                            tint = Color(0xFF6366F1),
+                            surfaceColor = Color.White.copy(alpha = 0.15f),
+                            borderColor = Color.White.copy(alpha = 0.3f)
                         ) {
                             Icon(
                                 Icons.Default.Add,
@@ -241,35 +280,82 @@ fun ExpandedOverlay(
                         }
 
                         if (showAddSequelButton) {
-                            Spacer(modifier = Modifier.width(12.dp))
-                            Row(
-                                modifier = Modifier
-                                    .height(24.dp)
-                                    .clip(RoundedCornerShape(50))
-                                    .background(
-                                        brush = Brush.linearGradient(
-                                            colors = listOf(
-                                                Color(0xFF2AF598),
-                                                Color(0xFF009EFD)
-                                            )
-                                        )
-                                    )
-                                    .border(1.dp, Color.White.copy(alpha = 0.5f), RoundedCornerShape(50))
-                                    .clickable { onAddSequel() }
-                                    .padding(horizontal = 10.dp),
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                Text(
-                                    text = "Add",
-                                    color = Color.White,
-                                    fontWeight = FontWeight.Bold,
-                                    fontSize = 10.sp
-                                )
-                            }
+                            Spacer(modifier = Modifier.width(10.dp))
+                            // Sequel button with liquid glass styling
+                            LiquidGlassAddSequelButton(
+                                onClick = onAddSequel,
+                                backdrop = backdrop
+                            )
                         }
                     }
                 }
             }
         }
+    }
+}
+
+@Composable
+private fun LiquidGlassAddSequelButton(
+    onClick: () -> Unit,
+    backdrop: Backdrop
+) {
+    val shape = RoundedCornerShape(50)
+    val shapeProvider = remember { { shape } }
+    
+    Box(
+        modifier = Modifier
+            .height(26.dp)
+            .then(
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                    Modifier.drawBackdrop(
+                        backdrop = backdrop,
+                        shape = shapeProvider,
+                        effects = {
+                            vibrancy()
+                            blur(10f * density)
+                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                                lens(
+                                    refractionHeight = 4f * density,
+                                    refractionAmount = 8f * density
+                                )
+                            }
+                        },
+                        onDrawSurface = {
+                            drawRect(Color(0xFF2AF598).copy(alpha = 0.4f))
+                        }
+                    )
+                } else {
+                    Modifier
+                        .clip(shape)
+                        .background(
+                            brush = Brush.linearGradient(
+                                colors = listOf(
+                                    Color(0xFF2AF598),
+                                    Color(0xFF009EFD)
+                                )
+                            )
+                        )
+                }
+            )
+            .border(
+                1.dp,
+                Brush.linearGradient(
+                    colors = listOf(
+                        Color(0xFF2AF598).copy(alpha = 0.8f),
+                        Color(0xFF009EFD).copy(alpha = 0.6f)
+                    )
+                ),
+                shape
+            )
+            .clickable { onClick() }
+            .padding(horizontal = 12.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        Text(
+            text = "Add",
+            color = Color.White,
+            fontWeight = FontWeight.Bold,
+            fontSize = 11.sp
+        )
     }
 }
