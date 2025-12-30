@@ -56,11 +56,10 @@ import com.kotla.anifloat.ui.theme.PrimaryGradientEnd
 import com.kotla.anifloat.ui.theme.PrimaryGradientStart
 import com.kotla.anifloat.ui.theme.TextPrimary
 import com.kotla.anifloat.ui.theme.TextSecondary
-import com.kyant.backdrop.Backdrop
-import com.kotla.anifloat.ui.components.LiquidGlassCard
-import com.kotla.anifloat.ui.components.LiquidGlassCircleButton
-import com.kotla.anifloat.ui.components.LiquidGlassSurface
-import com.kotla.anifloat.ui.components.rememberAmbientBackdrop
+import com.kotla.anifloat.ui.components.ClearGlassCard
+import com.kotla.anifloat.ui.components.ClearGlassCircleButton
+import com.kotla.anifloat.ui.components.ClearGlassSurface
+import com.kotla.anifloat.ui.components.FrostedGlassSurface
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -206,12 +205,6 @@ fun HomeScreen(
 
 @Composable
 fun AnimeList(animeList: List<MediaListEntry>, onItemClick: (MediaListEntry) -> Unit) {
-    // Create ambient backdrop for liquid glass effect in list items
-    val backdrop = rememberAmbientBackdrop(
-        baseColor = DarkBackground,
-        highlightColor = DarkSurface
-    )
-    
     LazyColumn(
         contentPadding = PaddingValues(16.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp)
@@ -219,8 +212,7 @@ fun AnimeList(animeList: List<MediaListEntry>, onItemClick: (MediaListEntry) -> 
         items(animeList) { entry ->
             AnimeItem(
                 entry = entry,
-                onClick = { onItemClick(entry) },
-                backdrop = backdrop
+                onClick = { onItemClick(entry) }
             )
         }
     }
@@ -229,8 +221,7 @@ fun AnimeList(animeList: List<MediaListEntry>, onItemClick: (MediaListEntry) -> 
 @Composable
 fun AnimeItem(
     entry: MediaListEntry,
-    onClick: () -> Unit,
-    backdrop: Backdrop
+    onClick: () -> Unit
 ) {
     val progress = entry.progress
     val total = entry.media.episodes ?: 0
@@ -243,15 +234,13 @@ fun AnimeItem(
         )
     )
 
-    LiquidGlassCard(
+    ClearGlassCard(
         modifier = Modifier
             .fillMaxWidth()
             .height(110.dp)
             .clickable(onClick = onClick),
-        backdrop = backdrop,
         cornerRadius = 18.dp,
-        blurRadius = 24.dp,
-        surfaceColor = DarkSurface.copy(alpha = 0.6f),
+        backgroundColor = DarkSurface.copy(alpha = 0.8f),
         borderGradient = glassBorder
     ) {
         Row(
@@ -333,18 +322,15 @@ fun AnimeItem(
                 }
             }
 
-            // Play button with liquid glass effect
-            LiquidGlassCircleButton(
+            // Play button with glass effect
+            ClearGlassCircleButton(
                 onClick = onClick,
-                backdrop = backdrop,
                 modifier = Modifier
                     .padding(end = 12.dp)
                     .size(40.dp),
                 size = 40.dp,
-                blurRadius = 16.dp,
-                tint = PrimaryAccent,
-                surfaceColor = Color.White.copy(alpha = 0.1f),
-                borderColor = PrimaryAccent.copy(alpha = 0.4f)
+                backgroundColor = PrimaryAccent.copy(alpha = 0.2f),
+                borderColor = PrimaryAccent.copy(alpha = 0.5f)
             ) {
                 Icon(
                     imageVector = Icons.Default.PlayArrow,
@@ -434,23 +420,16 @@ private fun UpdateAvailableDialog(
     onDownload: (String?) -> Unit,
     onOpenReleasePage: () -> Unit
 ) {
-    val backdrop = rememberAmbientBackdrop(
-        baseColor = DarkBackground,
-        highlightColor = DarkSurface
-    )
-    
     Dialog(
         onDismissRequest = onDismiss,
         properties = DialogProperties(dismissOnBackPress = true, dismissOnClickOutside = true)
     ) {
-        LiquidGlassCard(
+        ClearGlassCard(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(16.dp),
-            backdrop = backdrop,
             cornerRadius = 24.dp,
-            blurRadius = 32.dp,
-            surfaceColor = DarkSurface.copy(alpha = 0.7f),
+            backgroundColor = DarkSurface.copy(alpha = 0.9f),
             borderGradient = Brush.verticalGradient(
                 colors = listOf(
                     Color.White.copy(alpha = 0.2f),
@@ -548,17 +527,15 @@ private fun UpdateAvailableDialog(
                 
                 Spacer(modifier = Modifier.height(24.dp))
                 
-                // Download button with liquid glass
-                LiquidGlassSurface(
+                // Download button with glass effect
+                FrostedGlassSurface(
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(48.dp),
-                    backdrop = backdrop,
                     shape = RoundedCornerShape(12.dp),
-                    blurRadius = 16.dp,
-                    tint = PrimaryAccent,
-                    surfaceColor = PrimaryAccent.copy(alpha = 0.3f),
-                    borderColor = PrimaryAccent.copy(alpha = 0.5f),
+                    tintColor = PrimaryAccent,
+                    tintAlpha = 0.3f,
+                    borderAlpha = 0.5f,
                     onClick = { onDownload(updateInfo.downloadUrl) }
                 ) {
                     Box(
@@ -603,23 +580,16 @@ private fun UpdateAvailableDialog(
 
 @Composable
 private fun DownloadingDialog(progress: Int) {
-    val backdrop = rememberAmbientBackdrop(
-        baseColor = DarkBackground,
-        highlightColor = DarkSurface
-    )
-    
     Dialog(
         onDismissRequest = { /* Cannot dismiss while downloading */ },
         properties = DialogProperties(dismissOnBackPress = false, dismissOnClickOutside = false)
     ) {
-        LiquidGlassCard(
+        ClearGlassCard(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(16.dp),
-            backdrop = backdrop,
             cornerRadius = 24.dp,
-            blurRadius = 32.dp,
-            surfaceColor = DarkSurface.copy(alpha = 0.7f),
+            backgroundColor = DarkSurface.copy(alpha = 0.9f),
             borderGradient = Brush.verticalGradient(
                 colors = listOf(
                     Color.White.copy(alpha = 0.2f),
@@ -690,23 +660,16 @@ private fun UpdateErrorDialog(
     onDismiss: () -> Unit,
     onRetry: () -> Unit
 ) {
-    val backdrop = rememberAmbientBackdrop(
-        baseColor = DarkBackground,
-        highlightColor = DarkSurface
-    )
-    
     Dialog(
         onDismissRequest = onDismiss,
         properties = DialogProperties(dismissOnBackPress = true, dismissOnClickOutside = true)
     ) {
-        LiquidGlassCard(
+        ClearGlassCard(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(16.dp),
-            backdrop = backdrop,
             cornerRadius = 24.dp,
-            blurRadius = 32.dp,
-            surfaceColor = DarkSurface.copy(alpha = 0.7f),
+            backgroundColor = DarkSurface.copy(alpha = 0.9f),
             borderGradient = Brush.verticalGradient(
                 colors = listOf(
                     Color(0xFFEF5350).copy(alpha = 0.3f),
@@ -743,15 +706,18 @@ private fun UpdateErrorDialog(
                     horizontalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
                     // Cancel button with glass effect
-                    LiquidGlassSurface(
+                    ClearGlassSurface(
                         modifier = Modifier
                             .weight(1f)
                             .height(44.dp),
-                        backdrop = backdrop,
                         shape = RoundedCornerShape(12.dp),
-                        blurRadius = 12.dp,
-                        surfaceColor = Color.White.copy(alpha = 0.08f),
-                        borderColor = Color.White.copy(alpha = 0.2f),
+                        backgroundColor = Color.White.copy(alpha = 0.08f),
+                        borderGradient = Brush.verticalGradient(
+                            colors = listOf(
+                                Color.White.copy(alpha = 0.2f),
+                                Color.White.copy(alpha = 0.1f)
+                            )
+                        ),
                         onClick = onDismiss
                     ) {
                         Box(
@@ -763,16 +729,14 @@ private fun UpdateErrorDialog(
                     }
                     
                     // Retry button with glass effect
-                    LiquidGlassSurface(
+                    FrostedGlassSurface(
                         modifier = Modifier
                             .weight(1f)
                             .height(44.dp),
-                        backdrop = backdrop,
                         shape = RoundedCornerShape(12.dp),
-                        blurRadius = 12.dp,
-                        tint = PrimaryAccent,
-                        surfaceColor = PrimaryAccent.copy(alpha = 0.3f),
-                        borderColor = PrimaryAccent.copy(alpha = 0.5f),
+                        tintColor = PrimaryAccent,
+                        tintAlpha = 0.3f,
+                        borderAlpha = 0.5f,
                         onClick = onRetry
                     ) {
                         Box(

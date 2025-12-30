@@ -1,6 +1,5 @@
 package com.kotla.anifloat.ui.overlay
 
-import android.os.Build
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.MarqueeAnimationMode
 import androidx.compose.foundation.background
@@ -23,18 +22,12 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
-import com.kyant.backdrop.Backdrop
-import com.kyant.backdrop.drawBackdrop
-import com.kyant.backdrop.effects.blur
-import com.kyant.backdrop.effects.lens
-import com.kyant.backdrop.effects.vibrancy
-import com.kotla.anifloat.ui.components.LiquidGlassCard
-import com.kotla.anifloat.ui.components.LiquidGlassCircleButton
-import com.kotla.anifloat.ui.components.rememberAmbientBackdrop
+import com.kotla.anifloat.ui.components.ClearGlassCard
+import com.kotla.anifloat.ui.components.ClearGlassCircleButton
+import com.kotla.anifloat.ui.components.FrostedGlassSurface
 
 @Composable
 fun OverlayContent(
@@ -52,14 +45,8 @@ fun OverlayContent(
     showAddSequelButton: Boolean = false,
     onAddSequel: () -> Unit = {}
 ) {
-    // Create ambient backdrop for liquid glass effect
-    val backdrop = rememberAmbientBackdrop()
-    
     if (isCollapsed) {
-        CollapsedOverlay(
-            onExpand = onExpand,
-            backdrop = backdrop
-        )
+        CollapsedOverlay(onExpand = onExpand)
     } else {
         ExpandedOverlay(
             title = title,
@@ -72,26 +59,19 @@ fun OverlayContent(
             onClose = onClose,
             isBlurSupported = isBlurSupported,
             showAddSequelButton = showAddSequelButton,
-            onAddSequel = onAddSequel,
-            backdrop = backdrop
+            onAddSequel = onAddSequel
         )
     }
 }
 
 @Composable
-fun CollapsedOverlay(
-    onExpand: () -> Unit,
-    backdrop: Backdrop
-) {
-    LiquidGlassCircleButton(
+fun CollapsedOverlay(onExpand: () -> Unit) {
+    ClearGlassCircleButton(
         onClick = onExpand,
-        backdrop = backdrop,
         modifier = Modifier.size(44.dp),
         size = 44.dp,
-        blurRadius = 20.dp,
-        tint = Color(0xFF6366F1),
-        surfaceColor = Color.White.copy(alpha = 0.12f),
-        borderColor = Color.White.copy(alpha = 0.3f)
+        backgroundColor = Color.Black.copy(alpha = 0.25f),
+        borderColor = Color.White.copy(alpha = 0.5f)
     ) {
         Icon(
             Icons.Default.PlayArrow,
@@ -115,25 +95,21 @@ fun ExpandedOverlay(
     onClose: () -> Unit,
     isBlurSupported: Boolean,
     showAddSequelButton: Boolean,
-    onAddSequel: () -> Unit,
-    backdrop: Backdrop
+    onAddSequel: () -> Unit
 ) {
-    val glassBorder = Brush.verticalGradient(
-        colors = listOf(
-            Color.White.copy(alpha = 0.4f),
-            Color.White.copy(alpha = 0.1f)
-        )
-    )
-
-    LiquidGlassCard(
+    // Clear glass card - very transparent to show blur behind
+    ClearGlassCard(
         modifier = Modifier
             .width(220.dp)
             .wrapContentHeight(),
-        backdrop = backdrop,
         cornerRadius = 20.dp,
-        blurRadius = 28.dp,
-        surfaceColor = Color.White.copy(alpha = 0.08f),
-        borderGradient = glassBorder
+        backgroundColor = Color.Black.copy(alpha = if (isBlurSupported) 0.15f else 0.7f),
+        borderGradient = Brush.verticalGradient(
+            colors = listOf(
+                Color.White.copy(alpha = 0.6f),
+                Color.White.copy(alpha = 0.15f)
+            )
+        )
     ) {
         Column(
             modifier = Modifier.padding(12.dp),
@@ -145,15 +121,13 @@ fun ExpandedOverlay(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.Start
             ) {
-                // Liquid glass minimize button
-                LiquidGlassCircleButton(
+                // Minimize button
+                ClearGlassCircleButton(
                     onClick = onMinimize,
-                    backdrop = backdrop,
                     modifier = Modifier.size(24.dp),
                     size = 24.dp,
-                    blurRadius = 12.dp,
-                    surfaceColor = Color.White.copy(alpha = 0.15f),
-                    borderColor = Color.White.copy(alpha = 0.2f)
+                    backgroundColor = Color.White.copy(alpha = 0.1f),
+                    borderColor = Color.White.copy(alpha = 0.3f)
                 ) {
                     Icon(
                         imageVector = Icons.Default.KeyboardArrowDown,
@@ -166,7 +140,7 @@ fun ExpandedOverlay(
                 Text(
                     text = "Tracker",
                     style = MaterialTheme.typography.labelSmall,
-                    color = Color.White.copy(alpha = 0.8f),
+                    color = Color.White.copy(alpha = 0.9f),
                     fontWeight = FontWeight.Medium
                 )
                 Spacer(modifier = Modifier.weight(1f))
@@ -179,7 +153,7 @@ fun ExpandedOverlay(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.Top
             ) {
-                // Poster with subtle glass border
+                // Poster with glass border
                 if (coverImage.isNotEmpty()) {
                     Box(
                         modifier = Modifier
@@ -188,7 +162,7 @@ fun ExpandedOverlay(
                             .clip(RoundedCornerShape(10.dp))
                             .border(
                                 1.dp,
-                                Color.White.copy(alpha = 0.2f),
+                                Color.White.copy(alpha = 0.3f),
                                 RoundedCornerShape(10.dp)
                             )
                     ) {
@@ -228,27 +202,25 @@ fun ExpandedOverlay(
                     Text(
                         text = "$progress / ${if (total > 0) total else "?"} Episodes",
                         style = MaterialTheme.typography.labelSmall,
-                        color = Color.White.copy(alpha = 0.85f),
+                        color = Color.White.copy(alpha = 0.9f),
                         fontWeight = FontWeight.SemiBold
                     )
                     
                     Spacer(modifier = Modifier.height(12.dp))
                     
-                    // Compact Controls with liquid glass buttons
+                    // Controls
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.Start,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        // Minus Button - Liquid Glass
-                        LiquidGlassCircleButton(
+                        // Minus Button
+                        ClearGlassCircleButton(
                             onClick = onDecrement,
-                            backdrop = backdrop,
                             modifier = Modifier.size(32.dp),
                             size = 32.dp,
-                            blurRadius = 12.dp,
-                            surfaceColor = Color.White.copy(alpha = 0.12f),
-                            borderColor = Color.White.copy(alpha = 0.25f)
+                            backgroundColor = Color.White.copy(alpha = 0.1f),
+                            borderColor = Color.White.copy(alpha = 0.35f)
                         ) {
                             Text(
                                 "-",
@@ -260,16 +232,13 @@ fun ExpandedOverlay(
                         
                         Spacer(modifier = Modifier.width(10.dp))
 
-                        // Plus Button - Liquid Glass
-                        LiquidGlassCircleButton(
+                        // Plus Button
+                        ClearGlassCircleButton(
                             onClick = onIncrement,
-                            backdrop = backdrop,
                             modifier = Modifier.size(32.dp),
                             size = 32.dp,
-                            blurRadius = 12.dp,
-                            tint = Color(0xFF6366F1),
-                            surfaceColor = Color.White.copy(alpha = 0.15f),
-                            borderColor = Color.White.copy(alpha = 0.3f)
+                            backgroundColor = Color.White.copy(alpha = 0.15f),
+                            borderColor = Color.White.copy(alpha = 0.5f)
                         ) {
                             Icon(
                                 Icons.Default.Add,
@@ -281,81 +250,33 @@ fun ExpandedOverlay(
 
                         if (showAddSequelButton) {
                             Spacer(modifier = Modifier.width(10.dp))
-                            // Sequel button with liquid glass styling
-                            LiquidGlassAddSequelButton(
-                                onClick = onAddSequel,
-                                backdrop = backdrop
-                            )
+                            // Sequel button
+                            FrostedGlassSurface(
+                                modifier = Modifier.height(26.dp),
+                                shape = RoundedCornerShape(13.dp),
+                                tintColor = Color(0xFF2AF598),
+                                tintAlpha = 0.25f,
+                                borderAlpha = 0.6f,
+                                onClick = onAddSequel
+                            ) {
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxSize()
+                                        .padding(horizontal = 12.dp),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Text(
+                                        text = "Add",
+                                        color = Color.White,
+                                        fontWeight = FontWeight.Bold,
+                                        fontSize = 11.sp
+                                    )
+                                }
+                            }
                         }
                     }
                 }
             }
         }
-    }
-}
-
-@Composable
-private fun LiquidGlassAddSequelButton(
-    onClick: () -> Unit,
-    backdrop: Backdrop
-) {
-    val shape = RoundedCornerShape(50)
-    val shapeProvider = remember { { shape } }
-    
-    Box(
-        modifier = Modifier
-            .height(26.dp)
-            .then(
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                    Modifier.drawBackdrop(
-                        backdrop = backdrop,
-                        shape = shapeProvider,
-                        effects = {
-                            vibrancy()
-                            blur(10f * density)
-                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                                lens(
-                                    refractionHeight = 4f * density,
-                                    refractionAmount = 8f * density
-                                )
-                            }
-                        },
-                        onDrawSurface = {
-                            drawRect(Color(0xFF2AF598).copy(alpha = 0.4f))
-                        }
-                    )
-                } else {
-                    Modifier
-                        .clip(shape)
-                        .background(
-                            brush = Brush.linearGradient(
-                                colors = listOf(
-                                    Color(0xFF2AF598),
-                                    Color(0xFF009EFD)
-                                )
-                            )
-                        )
-                }
-            )
-            .border(
-                1.dp,
-                Brush.linearGradient(
-                    colors = listOf(
-                        Color(0xFF2AF598).copy(alpha = 0.8f),
-                        Color(0xFF009EFD).copy(alpha = 0.6f)
-                    )
-                ),
-                shape
-            )
-            .clickable { onClick() }
-            .padding(horizontal = 12.dp),
-        contentAlignment = Alignment.Center
-    ) {
-        Text(
-            text = "Add",
-            color = Color.White,
-            fontWeight = FontWeight.Bold,
-            fontSize = 11.sp
-        )
     }
 }
