@@ -98,16 +98,20 @@ fun CloseTarget(isOver: Boolean) {
             .size(size)
             .scale(scale)
             .clip(CircleShape)
-            .drawBackdrop(backdrop, { CircleShape }) {
-                blur(blurRadius)
-                vibrancy()
-                lens(
-                    refractionHeight = if (isOver) 8f else 5f,
-                    refractionAmount = lensAmount,
-                    depthEffect = true,
-                    chromaticAberration = true
-                )
-            }
+            .drawBackdrop(
+                backdrop = backdrop,
+                shape = { CircleShape },
+                effects = {
+                    blur(blurRadius)
+                    vibrancy()
+                    lens(
+                        refractionHeight = if (isOver) 8f else 5f,
+                        refractionAmount = lensAmount,
+                        depthEffect = true,
+                        chromaticAberration = true
+                    )
+                }
+            )
             .background(surfaceColor)
             .border(
                 width = if (isOver) 2.dp else 1.dp,

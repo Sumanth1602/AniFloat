@@ -145,19 +145,23 @@ fun LiquidGlassSurface(
     Box(
         modifier = modifier
             .clip(shape)
-            .drawBackdrop(backdrop, { shape }) {
-                // Apply blur effect
-                blur(blurRadius)
-                // Apply vibrancy (color overlay)
-                vibrancy()
-                // Apply lens refraction at edges
-                lens(
-                    refractionHeight = lensRefractionHeight,
-                    refractionAmount = lensRefractionAmount,
-                    depthEffect = true,
-                    chromaticAberration = true
-                )
-            }
+            .drawBackdrop(
+                backdrop = backdrop,
+                shape = { shape },
+                effects = {
+                    // Apply blur effect
+                    blur(blurRadius)
+                    // Apply vibrancy (color overlay)
+                    vibrancy()
+                    // Apply lens refraction at edges
+                    lens(
+                        refractionHeight = lensRefractionHeight,
+                        refractionAmount = lensRefractionAmount,
+                        depthEffect = true,
+                        chromaticAberration = true
+                    )
+                }
+            )
             .background(surfaceColor)
             .border(borderWidth, borderColor, shape)
             .then(
@@ -200,16 +204,20 @@ fun LiquidGlassCircleButton(
     Box(
         modifier = modifier
             .clip(CircleShape)
-            .drawBackdrop(backdrop, { CircleShape }) {
-                blur(blurRadius)
-                vibrancy()
-                lens(
-                    refractionHeight = lensRefractionHeight,
-                    refractionAmount = lensRefractionAmount,
-                    depthEffect = true,
-                    chromaticAberration = true
-                )
-            }
+            .drawBackdrop(
+                backdrop = backdrop,
+                shape = { CircleShape },
+                effects = {
+                    blur(blurRadius)
+                    vibrancy()
+                    lens(
+                        refractionHeight = lensRefractionHeight,
+                        refractionAmount = lensRefractionAmount,
+                        depthEffect = true,
+                        chromaticAberration = true
+                    )
+                }
+            )
             .background(actualSurfaceColor)
             .border(1.dp, actualBorderColor, CircleShape)
             .clickable(onClick = onClick),
@@ -243,16 +251,20 @@ fun LiquidGlassCard(
     Box(
         modifier = modifier
             .clip(shape)
-            .drawBackdrop(backdrop, { shape }) {
-                blur(blurRadius)
-                vibrancy()
-                lens(
-                    refractionHeight = lensRefractionHeight,
-                    refractionAmount = lensRefractionAmount,
-                    depthEffect = true,
-                    chromaticAberration = true
-                )
-            }
+            .drawBackdrop(
+                backdrop = backdrop,
+                shape = { shape },
+                effects = {
+                    blur(blurRadius)
+                    vibrancy()
+                    lens(
+                        refractionHeight = lensRefractionHeight,
+                        refractionAmount = lensRefractionAmount,
+                        depthEffect = true,
+                        chromaticAberration = true
+                    )
+                }
+            )
             .background(surfaceColor)
             .border(1.dp, borderGradient, shape),
         content = content
