@@ -18,8 +18,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.kyant.backdrop.backdrops.rememberCanvasBackdrop
@@ -64,33 +62,15 @@ fun CloseTarget(isOver: Boolean) {
         label = "border"
     )
     
-    // Create backdrop with animated colors
+    // Create backdrop with clean solid layers
     val backdrop = rememberCanvasBackdrop {
         val primaryColor = if (isOver) Color(0xFF2D0A0A) else Color(0xFF0D1B2A)
         val secondaryColor = if (isOver) Color(0xFF4A1515) else Color(0xFF1B263B)
         val accentColor = if (isOver) Color(0xFF8B2020) else Color(0xFF415A77)
-        
-        drawRect(
-            brush = Brush.radialGradient(
-                colors = listOf(accentColor, secondaryColor, primaryColor),
-                center = Offset(this.size.width * 0.4f, this.size.height * 0.4f),
-                radius = this.size.maxDimension * 1.2f
-            )
-        )
-        
-        // Add highlight
-        drawCircle(
-            brush = Brush.radialGradient(
-                colors = listOf(
-                    Color.White.copy(alpha = 0.1f),
-                    Color.Transparent
-                ),
-                center = Offset(this.size.width * 0.3f, this.size.height * 0.3f),
-                radius = this.size.minDimension * 0.4f
-            ),
-            center = Offset(this.size.width * 0.3f, this.size.height * 0.3f),
-            radius = this.size.minDimension * 0.4f
-        )
+
+        drawRect(primaryColor)
+        drawRect(secondaryColor.copy(alpha = 0.35f))
+        drawRect(accentColor.copy(alpha = 0.18f))
     }
 
     Box(
@@ -115,12 +95,7 @@ fun CloseTarget(isOver: Boolean) {
             .background(surfaceColor)
             .border(
                 width = if (isOver) 2.dp else 1.dp,
-                brush = Brush.verticalGradient(
-                    colors = listOf(
-                        borderColor,
-                        borderColor.copy(alpha = borderColor.alpha * 0.5f)
-                    )
-                ),
+                color = borderColor,
                 shape = CircleShape
             ),
         contentAlignment = Alignment.Center

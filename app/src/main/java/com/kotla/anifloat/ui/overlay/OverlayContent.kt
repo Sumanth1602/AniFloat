@@ -15,7 +15,6 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
@@ -122,12 +121,7 @@ fun ExpandedOverlay(
         lensRefractionHeight = 10f,
         lensRefractionAmount = 28f,
         surfaceColor = Color.White.copy(alpha = 0.05f),
-        borderGradient = Brush.verticalGradient(
-            colors = listOf(
-                Color.White.copy(alpha = 0.6f),
-                Color.White.copy(alpha = 0.15f)
-            )
-        )
+        borderColor = Color.White.copy(alpha = 0.4f)
     ) {
         Column(
             modifier = Modifier.padding(12.dp),
@@ -184,12 +178,7 @@ fun ExpandedOverlay(
                             .clip(RoundedCornerShape(12.dp))
                             .border(
                                 1.dp,
-                                Brush.verticalGradient(
-                                    colors = listOf(
-                                        Color.White.copy(alpha = 0.4f),
-                                        Color.White.copy(alpha = 0.15f)
-                                    )
-                                ),
+                                Color.White.copy(alpha = 0.3f),
                                 RoundedCornerShape(12.dp)
                             )
                     ) {

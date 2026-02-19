@@ -15,7 +15,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
@@ -24,6 +23,7 @@ import androidx.compose.ui.unit.sp
 import androidx.core.net.toUri
 import com.kotla.anifloat.ui.components.FrostedGlassSurface
 import com.kotla.anifloat.ui.theme.DarkBackground
+import com.kotla.anifloat.ui.theme.DarkSurface
 import com.kotla.anifloat.ui.theme.PrimaryAccent
 import com.kotla.anifloat.ui.theme.TextPrimary
 import com.kotla.anifloat.ui.theme.TextSecondary
@@ -39,19 +39,10 @@ fun LoginScreen() {
             .background(DarkBackground),
         contentAlignment = Alignment.Center
     ) {
-        // Subtle ambient glow in background
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .background(
-                    Brush.radialGradient(
-                        colors = listOf(
-                            PrimaryAccent.copy(alpha = 0.08f),
-                            Color.Transparent
-                        ),
-                        radius = 800f
-                    )
-                )
+                .background(DarkSurface.copy(alpha = 0.35f))
         )
         
         Column(

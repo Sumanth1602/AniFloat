@@ -2,7 +2,6 @@ package com.kotla.anifloat.ui.screens
 
 import android.app.Application
 import android.content.Intent
-import android.os.Build
 import android.provider.Settings
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -26,7 +25,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
@@ -41,19 +39,13 @@ import coil.compose.AsyncImage
 import coil.compose.rememberAsyncImagePainter
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import com.kotla.anifloat.data.UpdateInfo
 import com.kotla.anifloat.data.model.MediaListEntry
 import com.kotla.anifloat.service.FloatingOverlayService
-import com.kotla.anifloat.ui.theme.BorderColor
-import com.kotla.anifloat.ui.theme.CardStroke
 import com.kotla.anifloat.ui.theme.DarkBackground
 import com.kotla.anifloat.ui.theme.DarkSurface
 import com.kotla.anifloat.ui.theme.PrimaryAccent
-import com.kotla.anifloat.ui.theme.PrimaryAccentVariant
-import com.kotla.anifloat.ui.theme.PrimaryGradientEnd
-import com.kotla.anifloat.ui.theme.PrimaryGradientStart
 import com.kotla.anifloat.ui.theme.TextPrimary
 import com.kotla.anifloat.ui.theme.TextSecondary
 import com.kotla.anifloat.ui.components.ClearGlassCard
@@ -227,13 +219,6 @@ fun AnimeItem(
     val total = entry.media.episodes ?: 0
     val progressFraction = if (total > 0) progress.toFloat() / total.toFloat() else 0f
     
-    val glassBorder = Brush.verticalGradient(
-        colors = listOf(
-            Color.White.copy(alpha = 0.15f),
-            Color.White.copy(alpha = 0.05f)
-        )
-    )
-
     ClearGlassCard(
         modifier = Modifier
             .fillMaxWidth()
@@ -241,7 +226,7 @@ fun AnimeItem(
             .clickable(onClick = onClick),
         cornerRadius = 18.dp,
         backgroundColor = DarkSurface.copy(alpha = 0.8f),
-        borderGradient = glassBorder
+        borderColor = Color.White.copy(alpha = 0.14f)
     ) {
         Row(
             modifier = Modifier.fillMaxSize(),
@@ -259,20 +244,6 @@ fun AnimeItem(
                     contentDescription = null,
                     modifier = Modifier.fillMaxSize(),
                     contentScale = ContentScale.Crop
-                )
-                // Subtle gradient overlay for glass effect
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .background(
-                            Brush.horizontalGradient(
-                                colors = listOf(
-                                    Color.Transparent,
-                                    DarkSurface.copy(alpha = 0.3f)
-                                ),
-                                startX = 60f
-                            )
-                        )
                 )
             }
 
@@ -313,11 +284,7 @@ fun AnimeItem(
                         modifier = Modifier
                             .fillMaxHeight()
                             .fillMaxWidth(progressFraction)
-                            .background(
-                                Brush.horizontalGradient(
-                                    colors = listOf(PrimaryAccent, PrimaryAccentVariant)
-                                )
-                            )
+                            .background(PrimaryAccent)
                     )
                 }
             }
@@ -430,12 +397,7 @@ private fun UpdateAvailableDialog(
                 .padding(16.dp),
             cornerRadius = 24.dp,
             backgroundColor = DarkSurface.copy(alpha = 0.9f),
-            borderGradient = Brush.verticalGradient(
-                colors = listOf(
-                    Color.White.copy(alpha = 0.2f),
-                    Color.White.copy(alpha = 0.05f)
-                )
-            )
+            borderColor = Color.White.copy(alpha = 0.16f)
         ) {
             Column(
                 modifier = Modifier
@@ -590,12 +552,7 @@ private fun DownloadingDialog(progress: Int) {
                 .padding(16.dp),
             cornerRadius = 24.dp,
             backgroundColor = DarkSurface.copy(alpha = 0.9f),
-            borderGradient = Brush.verticalGradient(
-                colors = listOf(
-                    Color.White.copy(alpha = 0.2f),
-                    Color.White.copy(alpha = 0.05f)
-                )
-            )
+            borderColor = Color.White.copy(alpha = 0.16f)
         ) {
             Column(
                 modifier = Modifier
@@ -625,11 +582,7 @@ private fun DownloadingDialog(progress: Int) {
                         modifier = Modifier
                             .fillMaxHeight()
                             .fillMaxWidth(progress / 100f)
-                            .background(
-                                Brush.horizontalGradient(
-                                    colors = listOf(PrimaryAccent, PrimaryAccentVariant)
-                                )
-                            )
+                            .background(PrimaryAccent)
                     )
                 }
                 
@@ -670,12 +623,7 @@ private fun UpdateErrorDialog(
                 .padding(16.dp),
             cornerRadius = 24.dp,
             backgroundColor = DarkSurface.copy(alpha = 0.9f),
-            borderGradient = Brush.verticalGradient(
-                colors = listOf(
-                    Color(0xFFEF5350).copy(alpha = 0.3f),
-                    Color.White.copy(alpha = 0.05f)
-                )
-            )
+            borderColor = Color(0xFFEF5350).copy(alpha = 0.45f)
         ) {
             Column(
                 modifier = Modifier
@@ -712,12 +660,7 @@ private fun UpdateErrorDialog(
                             .height(44.dp),
                         shape = RoundedCornerShape(12.dp),
                         backgroundColor = Color.White.copy(alpha = 0.08f),
-                        borderGradient = Brush.verticalGradient(
-                            colors = listOf(
-                                Color.White.copy(alpha = 0.2f),
-                                Color.White.copy(alpha = 0.1f)
-                            )
-                        ),
+                        borderColor = Color.White.copy(alpha = 0.2f),
                         onClick = onDismiss
                     ) {
                         Box(
