@@ -19,8 +19,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.unit.Dp
@@ -31,12 +29,9 @@ import com.kyant.backdrop.drawBackdrop
 import com.kyant.backdrop.effects.blur
 import com.kyant.backdrop.effects.lens
 import com.kyant.backdrop.effects.vibrancy
-import kotlin.math.cos
-import kotlin.math.sin
 
 /**
- * Creates an animated backdrop with moving gradient for liquid glass effect.
- * The animation creates subtle movement that enhances the glass refraction illusion.
+ * Creates an animated backdrop with subtle tonal shifts for liquid glass effect.
  */
 @Composable
 fun rememberAnimatedGlassBackdrop(
@@ -57,41 +52,20 @@ fun rememberAnimatedGlassBackdrop(
     )
     
     return rememberCanvasBackdrop {
-        val angleRad = Math.toRadians(animatedOffset.toDouble())
-        val centerX = size.width * (0.5f + 0.3f * cos(angleRad).toFloat())
-        val centerY = size.height * (0.5f + 0.3f * sin(angleRad).toFloat())
-        
-        // Draw animated gradient backdrop
-        drawRect(
-            brush = Brush.radialGradient(
-                colors = listOf(accentColor, secondaryColor, primaryColor),
-                center = Offset(centerX, centerY),
-                radius = size.maxDimension * 1.2f
-            )
+        val mix = (animatedOffset / 360f).coerceIn(0f, 1f)
+        val base = Color(
+            red = primaryColor.red + (secondaryColor.red - primaryColor.red) * mix,
+            green = primaryColor.green + (secondaryColor.green - primaryColor.green) * mix,
+            blue = primaryColor.blue + (secondaryColor.blue - primaryColor.blue) * mix,
+            alpha = 1f
         )
-        
-        // Add secondary light source
-        val angle2 = angleRad + Math.PI
-        val center2X = size.width * (0.5f + 0.25f * cos(angle2).toFloat())
-        val center2Y = size.height * (0.5f + 0.25f * sin(angle2).toFloat())
-        
-        drawCircle(
-            brush = Brush.radialGradient(
-                colors = listOf(
-                    accentColor.copy(alpha = 0.4f),
-                    Color.Transparent
-                ),
-                center = Offset(center2X, center2Y),
-                radius = size.minDimension * 0.6f
-            ),
-            center = Offset(center2X, center2Y),
-            radius = size.minDimension * 0.6f
-        )
+        drawRect(base)
+        drawRect(accentColor.copy(alpha = 0.08f + 0.04f * mix))
     }
 }
 
 /**
- * Creates a static gradient backdrop for glass effect.
+ * Creates a static backdrop for glass effect.
  */
 @Composable
 fun rememberGlassBackdrop(
@@ -100,28 +74,9 @@ fun rememberGlassBackdrop(
     accentColor: Color = Color(0xFF0F3460)
 ): Backdrop {
     return rememberCanvasBackdrop {
-        // Multi-point gradient for depth
-        drawRect(
-            brush = Brush.linearGradient(
-                colors = listOf(highlightColor, baseColor, accentColor),
-                start = Offset(0f, 0f),
-                end = Offset(size.width, size.height)
-            )
-        )
-        
-        // Add highlight spot
-        drawCircle(
-            brush = Brush.radialGradient(
-                colors = listOf(
-                    Color.White.copy(alpha = 0.08f),
-                    Color.Transparent
-                ),
-                center = Offset(size.width * 0.3f, size.height * 0.3f),
-                radius = size.minDimension * 0.5f
-            ),
-            center = Offset(size.width * 0.3f, size.height * 0.3f),
-            radius = size.minDimension * 0.5f
-        )
+        drawRect(baseColor)
+        drawRect(highlightColor.copy(alpha = 0.2f))
+        drawRect(accentColor.copy(alpha = 0.08f))
     }
 }
 
@@ -238,12 +193,7 @@ fun LiquidGlassCard(
     lensRefractionHeight: Float = 6f,
     lensRefractionAmount: Float = 20f,
     surfaceColor: Color = Color.White.copy(alpha = 0.06f),
-    borderGradient: Brush = Brush.verticalGradient(
-        colors = listOf(
-            Color.White.copy(alpha = 0.4f),
-            Color.White.copy(alpha = 0.1f)
-        )
-    ),
+    borderColor: Color = Color.White.copy(alpha = 0.3f),
     content: @Composable BoxScope.() -> Unit
 ) {
     val shape = RoundedCornerShape(cornerRadius)
@@ -266,7 +216,7 @@ fun LiquidGlassCard(
                 }
             )
             .background(surfaceColor)
-            .border(1.dp, borderGradient, shape),
+            .border(1.dp, borderColor, shape),
         content = content
     )
 }
@@ -281,12 +231,7 @@ fun ClearGlassSurface(
     modifier: Modifier = Modifier,
     shape: Shape = RoundedCornerShape(20.dp),
     backgroundColor: Color = Color.Black.copy(alpha = 0.15f),
-    borderGradient: Brush = Brush.verticalGradient(
-        colors = listOf(
-            Color.White.copy(alpha = 0.5f),
-            Color.White.copy(alpha = 0.1f)
-        )
-    ),
+    borderColor: Color = Color.White.copy(alpha = 0.3f),
     borderWidth: Dp = 1.dp,
     onClick: (() -> Unit)? = null,
     content: @Composable BoxScope.() -> Unit
@@ -297,7 +242,7 @@ fun ClearGlassSurface(
             .drawBehind {
                 drawRect(backgroundColor)
             }
-            .border(borderWidth, borderGradient, shape)
+            .border(borderWidth, borderColor, shape)
             .then(
                 if (onClick != null) Modifier.clickable(onClick = onClick)
                 else Modifier
@@ -311,19 +256,14 @@ fun ClearGlassCard(
     modifier: Modifier = Modifier,
     cornerRadius: Dp = 20.dp,
     backgroundColor: Color = Color.Black.copy(alpha = 0.2f),
-    borderGradient: Brush = Brush.verticalGradient(
-        colors = listOf(
-            Color.White.copy(alpha = 0.5f),
-            Color.White.copy(alpha = 0.15f)
-        )
-    ),
+    borderColor: Color = Color.White.copy(alpha = 0.3f),
     content: @Composable BoxScope.() -> Unit
 ) {
     ClearGlassSurface(
         modifier = modifier,
         shape = RoundedCornerShape(cornerRadius),
         backgroundColor = backgroundColor,
-        borderGradient = borderGradient,
+        borderColor = borderColor,
         content = content
     )
 }
@@ -368,12 +308,7 @@ fun FrostedGlassSurface(
             .drawBehind { drawRect(tintColor.copy(alpha = tintAlpha)) }
             .border(
                 width = 1.dp,
-                brush = Brush.verticalGradient(
-                    colors = listOf(
-                        tintColor.copy(alpha = borderAlpha),
-                        tintColor.copy(alpha = borderAlpha * 0.3f)
-                    )
-                ),
+                color = tintColor.copy(alpha = borderAlpha),
                 shape = shape
             )
             .then(
